@@ -1,5 +1,7 @@
 # YouTube Downloader
 
+![Design](design.png)
+
 This project allows users to download YouTube videos in various formats and qualities.
 
 ## Features

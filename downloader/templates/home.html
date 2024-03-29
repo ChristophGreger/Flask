@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <link rel="stylesheet" href="./static/home.css">
+        <link rel="stylesheet" href="./static/index.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+        <title>
+            YouTube Downloader
+        </title>
+    </head>
+    <body>
+        <!-- Display the flash messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="flash">
+                        {{ message }}
+                        <button class="flash-button" type="button" data-dismiss="alert" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Main -->
+
+        <h1 class="h1-title">YouTube Downloader</h1>
+
+        <form method="post" action="/">
+            <!-- Submit video URL -->
+            <div class="submit-video">
+                <input type="text" name="video_url" placeholder="Enter YouTube Video URL" value="{{ video_url }}" autofocus autocomplete="off">
+                <button type="submit" name="submit_video_url" value="#">Select Video</button>
+                <br>
+            </div>
+
+            <!-- Video settings -->
+            {% if video %}
+            <div class="download-video">
+                <img src="{{ video.thumbnail_url }}" alt="Video Thumbnail">
+                <div class="download-info">
+                    <div class="video-info">
+                        <div class="title_and_author">
+                            <h4>{{ video.title }} | {{ video.author }}</h4>
+                        </div>
+                        <span>Length: {{ video.length }}s</span>
+                        <span>Views: {{ video.views }}</span>
+                    </div>
+                    <div class="video-download">
+                        <div class="video-download-selection">
+                            <select name="stream_radio">
+                                <option value="only_audio">Only Audio</option>
+                                <option value="only_video">Only Video</option>
+                                <option value="video" selected>Video (with audio)</option>
+                            </select>
+                            <select name="quality_select">
+                                <!-- Options -->
+                                {% for stream in only_audio_streams %}
+                                    {% set format = stream.mime_type.split('/')[1] %}
+                                    <option class="only_audio_option" value="{{ stream.itag }}">{{ stream.abr }} | {{ format }}</option>
+                                {% endfor %}
+                                {% for stream in only_video_streams %}
+                                    {% set format = stream.mime_type.split('/')[1] %}
+                                    <option class="only_video_option" value="{{ stream.itag }}">{{ stream.resolution }} | {{ format }}</option>
+                                {% endfor %}
+                                {% for stream in video_streams %}
+                                    {% set format = stream.mime_type.split('/')[1] %}
+                                    <option class="video_option" value="{{ stream.itag }}" selected>{{ stream.resolution }} | {{ format }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="video-download-button">
+                            <button type="submit" name="download_video" value="#">Download</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </form>
+
+        <!-- JS -->
+        <script src="/static/flash.js"></script>
+        <script src="/static/stream_types.js"></script>
+
+    </body>
+</html>

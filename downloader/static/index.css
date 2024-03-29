@@ -1,0 +1,14 @@
+@import url("https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap");
+
+:root {
+ --font-family: "Libre Franklin", sans-serif;
+
+ --orange: #FF7700;
+ --light-red: #CC0000;
+ --dark-red: #AA0000;
+ --light-purple: #AA00AA;
+ --dark-purple: #880088;
+ --black: #000000;
+ --white: #FFFFFF;
+ --gray: #565656;
+}

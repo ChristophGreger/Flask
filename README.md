@@ -12,6 +12,8 @@ This project allows users to download YouTube videos in various formats and qual
 
 - Python
 - JavaScript
+- HTML
+- CSS
 
 ## Setup and Installation
 

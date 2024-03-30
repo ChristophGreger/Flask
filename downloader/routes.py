@@ -2,11 +2,10 @@ from flask import render_template, flash, url_for, redirect, request, send_file
 from pytube import YouTube
 from pytube.exceptions import AgeRestrictedError
 from io import BytesIO
-
-from downloader import app
-
 import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
+
+from downloader import app
 
 @app.route("/", methods=["GET", "POST"])
 def home_page():

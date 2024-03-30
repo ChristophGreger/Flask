@@ -44,7 +44,6 @@ def home_page():
             try:
                 # Evaluate the quality settings
                 video_itag = request.form.get("quality_select")
-                flash(video_itag)
 
                 if not video_itag:
                     flash("Please select a video format.", category="danger")
@@ -56,7 +55,6 @@ def home_page():
                 video = url.streams.get_by_itag(int(video_itag))
                 video.stream_to_buffer(buffer)
                 buffer.seek(0)
-                flash(video.mime_type)
                 return send_file(buffer, as_attachment=True, download_name=video.title, mimetype=video.mime_type)
             except AgeRestrictedError:
                 flash("Video is age restricted. Cannot download.", category="danger")

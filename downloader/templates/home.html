@@ -34,7 +34,7 @@
         <form method="post" action="/">
             <!-- Submit video URL -->
             <div class="submit-video">
-                <input type="text" name="video_url" placeholder="Enter YouTube Video URL" value="{{ video_url }}" autofocus autocomplete="off">
+                <input id="video_url" type="text" name="video_url" placeholder="Enter YouTube Video URL" value="{{ video_url }}" autofocus autocomplete="off">
                 <button type="submit" name="submit_video_url" value="#">Select Video</button>
                 <br>
             </div>
@@ -58,7 +58,7 @@
                                 <option value="only_video">Only Video</option>
                                 <option value="video" selected>Video (with audio)</option>
                             </select>
-                            <select name="quality_select">
+                            <select name="quality_select" id="quality_select">
                                 <!-- Options -->
                                 {% for stream in only_audio_streams %}
                                     {% set format = stream.mime_type.split('/')[1] %}
@@ -75,7 +75,7 @@
                             </select>
                         </div>
                         <div class="video-download-button">
-                            <button type="submit" name="download_video" value="#">Download</button>
+                            <button type="button" id="download_button" name="download_video" value="#" onclick="download()">Download</button>
                         </div>
                     </div>
                 </div>
@@ -86,6 +86,7 @@
         <!-- JS -->
         <script src="/static/flash.js"></script>
         <script src="/static/stream_types.js"></script>
+        <script src="/static/download.js"></script>
 
     </body>
 </html>

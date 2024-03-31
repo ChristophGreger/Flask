@@ -1,11 +1,13 @@
-from flask import render_template, flash, url_for, redirect, request, send_file
+from flask import render_template, flash, url_for, redirect, request, send_file, make_response
 from pytube import YouTube
 from pytube.exceptions import AgeRestrictedError
 from io import BytesIO
 import ssl
+
 ssl._create_default_https_context = ssl._create_unverified_context
 
 from downloader import app
+
 
 @app.route("/", methods=["GET", "POST"])
 def home_page():
@@ -29,39 +31,50 @@ def home_page():
             video_streams = video.streams.filter(progressive=True)
 
             # Extract necessary information from the streams
-            only_audio_streams_info = [{'itag': s.itag, 'abr': s.abr, 'mime_type': s.mime_type} for s in only_audio_streams]
-            only_video_streams_info = [{'itag': s.itag, 'resolution': s.resolution, 'mime_type': s.mime_type} for s in only_video_streams]
-            video_streams_info = [{'itag': s.itag, 'resolution': s.resolution, 'mime_type': s.mime_type} for s in video_streams]
+            only_audio_streams_info = [{'itag': s.itag, 'abr': s.abr, 'mime_type': s.mime_type} for s in
+                                       only_audio_streams]
+            only_video_streams_info = [{'itag': s.itag, 'resolution': s.resolution, 'mime_type': s.mime_type} for s in
+                                       only_video_streams]
+            video_streams_info = [{'itag': s.itag, 'resolution': s.resolution, 'mime_type': s.mime_type} for s in
+                                  video_streams]
 
             return render_template("home.html", video=video, video_url=video_url,
                                    only_audio_streams=only_audio_streams_info,
                                    only_video_streams=only_video_streams_info,
                                    video_streams=video_streams_info)
-
-        # User clicked on download button
-        elif request.form.get("download_video"):
-            try:
-                # Evaluate the quality settings
-                video_itag = request.form.get("quality_select")
-
-                if not video_itag:
-                    flash("Please select a video format.", category="danger")
-                    return redirect(url_for("home_page"))
-
-                # Download video
-                buffer = BytesIO()
-                url = YouTube(video_url)
-                video = url.streams.get_by_itag(int(video_itag))
-                video.stream_to_buffer(buffer)
-                buffer.seek(0)
-                return send_file(buffer, as_attachment=True, download_name=video.title, mimetype=video.mime_type)
-            except AgeRestrictedError:
-                flash("Video is age restricted. Cannot download.", category="danger")
-                return redirect(url_for("home_page"))
         else:
             flash("Something went wrong. Please try again.", category="danger")
 
     return render_template("home.html")
+
+
+@app.route("/download", methods=["GET"])
+def download_video():
+    video_url = request.args.get("video_url")
+    try:
+        # Evaluate the quality settings
+        video_itag = request.args.get("quality_select")
+
+        print(video_url, video_itag)
+
+        if not video_itag:
+            flash("Please select a video format.", category="danger")
+            return redirect(url_for("home_page"))
+
+        # Download video
+        buffer = BytesIO()
+        url = YouTube(video_url)
+        video = url.streams.get_by_itag(int(video_itag))
+        video.stream_to_buffer(buffer)
+        buffer.seek(0)
+        response = make_response(buffer)
+        response.headers['Content-Type'] = video.mime_type
+        response.headers['Content-Disposition'] = 'attachment; filename=' + video.title + '.' + video.subtype
+        response.headers['Content-Length'] = str(video.filesize)
+        return response
+    except AgeRestrictedError:
+        flash("Video is age restricted. Cannot download.", category="danger")
+        return redirect(url_for("home_page"))
 
 
 def check_video_url(video_url):

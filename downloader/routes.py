@@ -1,5 +1,7 @@
-from flask import render_template, flash, url_for, redirect, request, send_file, make_response
-from pytube import YouTube
+import unicodedata
+from flask import render_template, flash, url_for, redirect, request, send_file, make_response, send_from_directory, \
+    stream_with_context, Response
+from pytube import YouTube, request as pytube_request
 from pytube.exceptions import AgeRestrictedError
 from io import BytesIO
 import ssl
@@ -7,6 +9,18 @@ import ssl
 ssl._create_default_https_context = ssl._create_unverified_context
 
 from downloader import app
+
+
+# convert unicode string to latin-1
+def convert(s):
+    r = ''
+    for c in s:
+        try:
+            c.encode('latin-1')
+        except UnicodeEncodeError:
+            c = unicodedata.normalize('NFKD', c).encode('latin-1', 'ignore').decode('latin-1')
+        r += c
+    return r
 
 
 @app.route("/", methods=["GET", "POST"])
@@ -55,22 +69,22 @@ def download_video():
         # Evaluate the quality settings
         video_itag = request.args.get("quality_select")
 
-        print(video_url, video_itag)
-
         if not video_itag:
             flash("Please select a video format.", category="danger")
             return redirect(url_for("home_page"))
 
         # Download video
-        buffer = BytesIO()
         url = YouTube(video_url)
         video = url.streams.get_by_itag(int(video_itag))
-        video.stream_to_buffer(buffer)
-        buffer.seek(0)
-        response = make_response(buffer)
+
+        response = Response(stream_with_context(pytube_request.stream(video.url)))
+        print(video.url)
         response.headers['Content-Type'] = video.mime_type
-        response.headers['Content-Disposition'] = 'attachment; filename=' + video.title + '.' + video.subtype
+        response.headers['Content-Disposition'] = 'attachment; filename=' + convert(video.title) + '.' + video.subtype
         response.headers['Content-Length'] = str(video.filesize)
+        response.headers['Cache-Control'] = 'no-cache'
+        response.headers['ETag'] = str(video.filesize)
+        response.headers['accept-ranges'] = 'bytes'
         return response
     except AgeRestrictedError:
         flash("Video is age restricted. Cannot download.", category="danger")

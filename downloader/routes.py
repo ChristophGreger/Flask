@@ -78,7 +78,6 @@ def download_video():
         video = url.streams.get_by_itag(int(video_itag))
 
         response = Response(stream_with_context(pytube_request.stream(video.url)))
-        print(video.url)
         response.headers['Content-Type'] = video.mime_type
         response.headers['Content-Disposition'] = 'attachment; filename=' + convert(video.title) + '.' + video.subtype
         response.headers['Content-Length'] = str(video.filesize)

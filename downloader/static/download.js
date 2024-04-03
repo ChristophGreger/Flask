@@ -1,4 +1,4 @@
-function download() {
+function download(sid) {
 
     /* Getting the form data */
     let video_url = document.getElementById("video_url").value;
@@ -7,8 +7,9 @@ function download() {
 
     /* Creating an anchor element to download the file */
     const anchor = document.createElement("a");
-    anchor.href = `/download?video_url=${video_url}&quality_select=${video_quality}`;
+    anchor.href = `/download?video_url=${video_url}&quality_select=${video_quality}&sid=${sid}`;
     anchor.download = "";
     document.body.appendChild(anchor);
     anchor.click();
+    anchor.remove();
 }

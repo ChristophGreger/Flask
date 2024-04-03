@@ -1,3 +1,4 @@
 Flask==3.0.2
 PyTube==15.0.0
-Werkzeug==2.3.8
+Werkzeug==3.0.2
+Flask-SocketIO==5.3.6

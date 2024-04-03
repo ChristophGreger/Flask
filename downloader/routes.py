@@ -1,14 +1,12 @@
 import unicodedata
-from flask import render_template, flash, url_for, redirect, request, send_file, make_response, send_from_directory, \
-    stream_with_context, Response
+from flask import render_template, flash, url_for, redirect, request, stream_with_context, Response, g, Blueprint
 from pytube import YouTube, request as pytube_request
 from pytube.exceptions import AgeRestrictedError
-from io import BytesIO
 import ssl
 
 ssl._create_default_https_context = ssl._create_unverified_context
 
-from downloader import app
+from downloader import app, socketio
 
 
 # convert unicode string to latin-1
@@ -62,9 +60,14 @@ def home_page():
     return render_template("home.html")
 
 
-@app.route("/download", methods=["GET"])
+# Necessary for the after_request handling
+download = Blueprint('simple_page', __name__)
+
+
+@download.route("/download", methods=["GET"])
 def download_video():
     video_url = request.args.get("video_url")
+    g.sid = request.args.get("sid")
     try:
         # Evaluate the quality settings
         video_itag = request.args.get("quality_select")
@@ -88,6 +91,16 @@ def download_video():
     except AgeRestrictedError:
         flash("Video is age restricted. Cannot download.", category="danger")
         return redirect(url_for("home_page"))
+
+
+# Used for emiting the download button color change on download start
+@download.after_request
+def download_after_request(response):
+    socketio.emit("downloadstarted", room=g.sid)
+    return response
+
+
+app.register_blueprint(download)
 
 
 def check_video_url(video_url):

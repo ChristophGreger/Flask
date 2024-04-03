@@ -7,6 +7,23 @@
         <link rel="stylesheet" href="./static/index.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+
+        <!-- Here comes the socketio stuff for the download button animation -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js" integrity="sha512-q/dWJ3kcmjBLU4Qc47E4A9kTB4m3wuTY7vkFJDTZKjTs8jhyGQnaUrxa0Ytd0ssMZhbNua9hE+E7Qv1j+DyZwA==" crossorigin="anonymous"></script>
+        <script type="text/javascript" charset="utf-8">
+            let socket = io();
+            socket.on('downloadstarted', function() {
+                let button = document.getElementById('download_button');
+                button.style.backgroundColor = 'green';
+            });
+            let sid = null;
+            socket.on('connect', function() {
+                sid = socket.id;
+            });
+        </script>
+
+
         <link href="https://fonts.googleapis.com/css2?family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
         <title>
             YouTube Downloader
@@ -75,7 +92,7 @@
                             </select>
                         </div>
                         <div class="video-download-button">
-                            <button type="button" id="download_button" name="download_video" value="#" onclick="download()">Download</button>
+                            <button type="button" id="download_button" name="download_video" value="#" onclick="download(sid)">Download</button>
                         </div>
                     </div>
                 </div>
